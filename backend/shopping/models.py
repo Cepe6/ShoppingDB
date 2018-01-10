@@ -28,5 +28,5 @@ class User(models.Model):
     name = models.CharField(max_length=200)
     password = forms.CharField(widget=forms.PasswordInput)
     is_store = models.BooleanField()
-    cart = models.OneToOneField(Cart, related_name='cart', null = True, blank=True)
-    wish_list = models.OneToOneField(WishList, related_name='wish_list', null = True, blank=True)
+    cart = models.OneToOneField(Cart, on_delete=models.CASCADE, related_name='cart', null = True, blank=True)
+    wish_list = models.OneToOneField(WishList, on_delete=models.CASCADE,  related_name='wish_list', null = True, blank=True)
