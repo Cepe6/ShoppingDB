@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from .models import User, Cart, Product
+from .models import User, Cart, Product, Buyer, Store
 
 
 #/users/
@@ -32,9 +32,20 @@ def add_user(request):
     type = 0
     if data["type"] == "store":
         type = 1
+
     new = User(name = data["name"], is_store = type)
     new.save()
+
+    if type == 0:
+        buyer = Buyer(user_id = new.id)
+        buyer.save()
+    else:
+        store = Store(user_id = new.id)
+        store.save()
+
     return JsonResponse({"status" : "add"})
+
+
 
 @csrf_exempt
 def users(request):
@@ -52,19 +63,9 @@ def get_user_info(user_id):
     else:
         type = "buyer"
 
-    cart = True
-    if user.cart is None:
-        cart = False
-
-    wish_list = True
-    if user.wish_list is None:
-        wish_list = False
-
     response = {
                     "name" : user.name,
                     "type" : type,
-                    "cart" : cart,
-                    "wish list" : wish_list
                 }
     return JsonResponse(response, safe = False)
 
@@ -200,12 +201,12 @@ def add_cart(request, buyer_id):
     data = json.loads(request.body)
     product = Product.objects.get(id = data["product_id"])
     print(product.name)
-    if User.objects.get(id = buyer_id).cart is None:
+    if Buyer.objects.get(user_id = buyer_id).cart is None:
         cart = Cart(buyer_id = buyer_id)
-        cart.save()
-    else:
-        cart = Cart.objects.filter(buyer_id = buyer_id)
-    cart.products.create()
+    #    cart.save()
+    #else:
+    #    cart = Cart.objects.filter(buyer_id = buyer_id)
+    #cart.products.create()
     #cart.products.add(product)
     #print(cart.products)
     #cart.save()
