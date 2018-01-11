@@ -1,7 +1,0 @@
-# ShoppingDB
-
-# Idea
-
-# Tables
-
-# Relations
