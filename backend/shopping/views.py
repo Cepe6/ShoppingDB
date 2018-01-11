@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from .models import User, Cart, Product, Buyer, Store
+from .models import User, Cart, WishList, Product, Buyer, Store
 
 
 #/users/
@@ -37,10 +37,16 @@ def add_user(request):
     new.save()
 
     if type == 0:
-        buyer = Buyer(user_id = new.id)
+        cart = Cart(id = new.id)
+        cart.save()
+
+        list = WishList(id = new.id)
+        list.save()
+
+        buyer = Buyer(id = new.id, cart = cart, wish_list = list)
         buyer.save()
     else:
-        store = Store(user_id = new.id)
+        store = Store(id = new.id)
         store.save()
 
     return JsonResponse({"status" : "add"})
@@ -187,34 +193,60 @@ def product_info(request, product_id):
 #/users/buyers/id/cart/
 
 def get_cart(buyer_id): 
-    products = User.objects.get(id = buyer_id).cart
+    cart = Cart.objects.get(id = buyer_id)
     response = []
-    for p in products:
+    for p in cart.products.all():
         response.append({
                     "id": p.id,
                     "name" : p.name,
                     "category" : p.category
                 })
-    return JsonResponse({}, safe = False)
+    return JsonResponse(response, safe = False)
 
 def add_cart(request, buyer_id):
     data = json.loads(request.body)
     product = Product.objects.get(id = data["product_id"])
-    print(product.name)
-    if Buyer.objects.get(user_id = buyer_id).cart is None:
-        cart = Cart(buyer_id = buyer_id)
-    #    cart.save()
-    #else:
-    #    cart = Cart.objects.filter(buyer_id = buyer_id)
-    #cart.products.create()
-    #cart.products.add(product)
-    #print(cart.products)
-    #cart.save()
+    
+    cart = Cart.objects.get(id = buyer_id)
+    cart.products.add(product)
+    cart.save()
     return JsonResponse({"status" : "add"})
 
 @csrf_exempt
 def cart(request, buyer_id):
     if request.method == "GET":
         return get_cart(buyer_id)
-    elif request.method == "POST":
+    elif request.method == "PUT":
         return add_cart(request, buyer_id)
+
+
+
+
+#/users/buyers/id/wish_list/
+
+def get_wish_list(list_id): 
+    list = WishList.objects.get(id = list_id)
+    response = []
+    for p in list.products.all():
+        response.append({
+                    "id": p.id,
+                    "name" : p.name,
+                    "category" : p.category
+                })
+    return JsonResponse(response, safe = False)
+
+def add_wish_list(request, list_id):
+    data = json.loads(request.body)
+    product = Product.objects.get(id = data["product_id"])
+    
+    list = WishList.objects.get(id = list_id)
+    list.products.add(product)
+    list.save()
+    return JsonResponse({"status" : "add"})
+
+@csrf_exempt
+def wish_list(request, list_id):
+    if request.method == "GET":
+        return get_wish_list(list_id)
+    elif request.method == "PUT":
+        return add_wish_list(request, list_id)

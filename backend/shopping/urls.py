@@ -6,7 +6,8 @@ urlpatterns = [
     url(r'^users/(?P<user_id>[0-9]+)/$', views.user_info, name='user_info'), #Get, Put, Delete
 
     url(r'^users/buyers/$', views.buyers, name='buyers'), #Get
-	url(r'^users/buyers/(?P<buyer_id>[0-9]+)/cart/$', views.cart, name='cart'),
+	url(r'^users/buyers/(?P<buyer_id>[0-9]+)/cart/$', views.cart, name='cart'), #Get, #Put
+	url(r'^users/buyers/(?P<list_id>[0-9]+)/wish_list/$', views.wish_list, name='wish_list'), #Get, #Put
 
     url(r'^users/stores/$', views.stores, name='stores'), #Get
 
